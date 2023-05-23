@@ -9,50 +9,65 @@ constexpr double FREQUENCY = 440.0;
 constexpr double AMPLITUDE = 0.3;
 
 #if defined(__linux__)
-    #include <ao/ao.h>
+#include <ao/ao.h>
 
-    void playSoundWave(double frequency, double amplitude, double duration)
+void printKeyboard()
+{
+    std::string keyboard_layout = R"(
+        |   |   |   |   |   | |   |   |   |   | |   | |   |   |   |
+        |   | S |   |   | F | | G |   |   | J | | K | | L |   |   |
+        |   |___|   |   |___| |___|   |   |___| |___| |___|   |   |__
+        |     |     |     |     |     |     |     |     |     |     |
+        |  Z  |  X  |  C  |  V  |  B  |  N  |  M  |  ,  |  .  |  /  |
+        |_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|)";
+
+    std::cout << keyboard_layout << std::endl;
+}
+
+void playSoundWave(double frequency, double amplitude, double duration)
+{
+    // Initialize audio output
+    ao_initialize();
+
+    // Set up audio format
+    ao_sample_format format;
+    format.bits = 16;
+    format.channels = 1;
+    format.rate = static_cast<int>(SAMPLE_RATE);
+    format.byte_format = AO_FMT_LITTLE;
+
+    // Open default driver for playback
+    ao_device *device = ao_open_live(ao_default_driver_id(), &format, nullptr);
+    if (device == nullptr)
     {
-        // Initialize audio output
-        ao_initialize();
-
-        // Set up audio format
-        ao_sample_format format;
-        format.bits = 16;
-        format.channels = 1;
-        format.rate = static_cast<int>(SAMPLE_RATE);
-        format.byte_format = AO_FMT_LITTLE;
-
-        // Open default driver for playback
-        ao_device* device = ao_open_live(ao_default_driver_id(), &format, nullptr);
-        if (device == nullptr)
-        {
-            std::cerr << "Error: Failed to open audio device." << std::endl;
-            return;
-        }
-
-        // Generate and play audio samples
-        for (double t = 0.0; t < duration; t += 1.0 / SAMPLE_RATE)
-        {
-            double sample = amplitude * std::sin(2 * M_PI * frequency * t);
-            int16_t sampleValue = static_cast<int16_t>(sample * INT16_MAX);
-            ao_play(device, reinterpret_cast<char*>(&sampleValue), sizeof(int16_t));
-        }
-
-        // Close the audio device
-        ao_close(device);
-
-        // Shutdown audio output
-        ao_shutdown();
+        std::cerr << "Error: Failed to open audio device." << std::endl;
+        return;
     }
 
+    // Generate and play audio samples
+    for (double t = 0.0; t < duration; t += 1.0 / SAMPLE_RATE)
+    {
+        double sample = amplitude * std::sin(2 * M_PI * frequency * t);
+        int16_t sampleValue = static_cast<int16_t>(sample * INT16_MAX);
+        ao_play(device, reinterpret_cast<char *>(&sampleValue), sizeof(int16_t));
+    }
+
+    // Close the audio device
+    ao_close(device);
+
+    // Shutdown audio output
+    ao_shutdown();
+}
+
 #else
-    #error "Unsupported platform"
+#error "Unsupported platform"
 
 #endif
 
 int main()
 {
+    printKeyboard();
+
     // Play the soundd
     std::cout << "Sound playing..." << std::endl;
     playSoundWave(440.0, 0.3, 3.0);
