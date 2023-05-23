@@ -53,7 +53,7 @@ constexpr double AMPLITUDE = 0.3;
 
 int main()
 {
-    // Play the sound
+    // Play the soundd
     std::cout << "Sound playing..." << std::endl;
     playSoundWave();
 
