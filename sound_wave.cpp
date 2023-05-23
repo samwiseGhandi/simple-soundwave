@@ -11,7 +11,7 @@ constexpr double AMPLITUDE = 0.3;
 #if defined(__linux__)
     #include <ao/ao.h>
 
-    void playSoundWave()
+    void playSoundWave(double frequency, double amplitude, double duration)
     {
         // Initialize audio output
         ao_initialize();
@@ -32,9 +32,9 @@ constexpr double AMPLITUDE = 0.3;
         }
 
         // Generate and play audio samples
-        for (double t = 0.0; t < DURATION; t += 1.0 / SAMPLE_RATE)
+        for (double t = 0.0; t < duration; t += 1.0 / SAMPLE_RATE)
         {
-            double sample = AMPLITUDE * std::sin(2 * M_PI * FREQUENCY * t);
+            double sample = amplitude * std::sin(2 * M_PI * frequency * t);
             int16_t sampleValue = static_cast<int16_t>(sample * INT16_MAX);
             ao_play(device, reinterpret_cast<char*>(&sampleValue), sizeof(int16_t));
         }
@@ -55,7 +55,7 @@ int main()
 {
     // Play the soundd
     std::cout << "Sound playing..." << std::endl;
-    playSoundWave();
+    playSoundWave(440.0, 0.3, 3.0);
 
     // Wait for the sound to finish playing
     std::this_thread::sleep_for(std::chrono::duration<double>(DURATION));
