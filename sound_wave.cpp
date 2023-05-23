@@ -11,7 +11,7 @@ constexpr double AMPLITUDE = 0.3;
 #if defined(__linux__)
     #include <ao/ao.h>
 
-    void playSoundWave()
+    void playSoundWave(double frequency, double amplitude, double duration)
     {
         // Initialize audio output
         ao_initialize();
@@ -46,6 +46,74 @@ constexpr double AMPLITUDE = 0.3;
         ao_shutdown();
     }
 
+#elif defined(_WIN32)
+    #include <Windows.h>
+
+    void playSoundWave(double frequency, double amplitude, double duration)
+    {
+        // Generate audio samples
+        std::vector<short> samples;
+        for (double t = 0.0; t < DURATION; t += 1.0 / SAMPLE_RATE)
+        {
+            double sample = AMPLITUDE * std::sin(2 * M_PI * FREQUENCY * t);
+            samples.push_back(static_cast<short>(sample * SHRT_MAX));
+        }
+
+        // Play audio
+        PlaySound(reinterpret_cast<LPCWSTR>(&samples[0]), NULL, SND_MEMORY | SND_ASYNC);
+    }
+
+#elif defined(__APPLE__)
+    #include <CoreAudio/CoreAudio.h>
+
+    void playSoundWave(double frequency, double amplitude, double duration)
+    {
+        // Generate audio samples
+        std::vector<float> samples;
+        for (double t = 0.0; t < DURATION; t += 1.0 / SAMPLE_RATE)
+        {
+            double sample = AMPLITUDE * std::sin(2 * M_PI * FREQUENCY * t);
+            samples.push_back(static_cast<float>(sample));
+        }
+
+        // Get the default audio output device
+        AudioDeviceID outputDeviceID;
+        UInt32 size = sizeof(outputDeviceID);
+        AudioObjectPropertyAddress propertyAddress = { kAudioHardwarePropertyDefaultOutputDevice,
+                                                       kAudioObjectPropertyScopeGlobal,
+                                                       kAudioObjectPropertyElementMaster };
+        AudioObjectGetPropertyData(kAudioObjectSystemObject, &propertyAddress, 0, nullptr, &size, &outputDeviceID);
+
+        // Set up audio stream description
+        AudioStreamBasicDescription streamFormat;
+        streamFormat.mSampleRate = SAMPLE_RATE;
+        streamFormat.mFormatID = kAudioFormatLinearPCM;
+        streamFormat.mFormatFlags = kAudioFormatFlagsNativeFloatPacked;
+        streamFormat.mBytesPerPacket = sizeof(float);
+        streamFormat.mFramesPerPacket = 1;
+        streamFormat.mBytesPerFrame = sizeof(float);
+        streamFormat.mChannelsPerFrame = 1;
+        streamFormat.mBitsPerChannel = sizeof(float) * 8;
+        streamFormat.mReserved = 0;
+
+        // Open the default output device for playback
+        AudioDeviceIOProcID procID;
+        AudioDeviceOpen(outputDeviceID, 0, &streamFormat, 0, nullptr, &procID);
+
+        // Start audio playback
+        AudioDeviceStart(outputDeviceID, procID);
+
+        // Write audio samples to the output device
+        for (const auto& sample : samples)
+        {
+            AudioDeviceWrite(outputDeviceID, 0, nullptr, &streamFormat, 1, &sample);
+        }
+
+        // Stop audio playback and close the output device
+        AudioDeviceStop(outputDeviceID, procID);
+        AudioDeviceClose(outputDeviceID);
+    }
+
 #else
     #error "Unsupported platform"
 
@@ -53,9 +121,9 @@ constexpr double AMPLITUDE = 0.3;
 
 int main()
 {
-    // Play the soundd
+    // Play the sound
     std::cout << "Sound playing..." << std::endl;
-    playSoundWave();
+    playSoundWave(440.0, 0.3, 3.0);
 
     // Wait for the sound to finish playing
     std::this_thread::sleep_for(std::chrono::duration<double>(DURATION));
