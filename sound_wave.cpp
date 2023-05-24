@@ -2,11 +2,25 @@
 #include <cmath>
 #include <thread>
 #include <chrono>
+#include <atomic>
+#include "NoiseMaker.h"
 
 constexpr double SAMPLE_RATE = 44100.0;
 constexpr double DURATION = 5.0;
 constexpr double FREQUENCY = 440.0;
 constexpr double AMPLITUDE = 0.3;
+
+// using namespace std;
+
+std::atomic<double> dFrequencyOut = 0.0;             //the note
+double dOctaveBaseFrequency = 110.0; //A2       //freq of octave
+double d12thRootOf2 = pow(2.0,1.0/12.0);        //assuming western 12 notes per octave
+
+double makeSound(double dTime){
+    double masterAmp = 0.5;
+    double dOutPut = sin(dFrequencyOut * 2.0 * M_PI * dTime);
+    return dOutPut * masterAmp; //To controle master volume
+}
 
 #if defined(__linux__)
 #include <ao/ao.h>
@@ -71,6 +85,7 @@ void playSoundWave(double frequency, double amplitude, double duration)
 
 int main()
 {
+
     printKeyboard();
 
     // Play the soundd
@@ -82,4 +97,5 @@ int main()
 
     std::cout << "Sound finished playing." << std::endl;
     return 0;
+    
 }
