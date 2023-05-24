@@ -3,7 +3,6 @@
 #include <thread>
 #include <chrono>
 #include <atomic>
-#include "NoiseMaker.h"
 
 constexpr double SAMPLE_RATE = 44100.0;
 constexpr double DURATION = 5.0;
