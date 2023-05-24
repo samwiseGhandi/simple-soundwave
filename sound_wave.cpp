@@ -14,12 +14,17 @@ constexpr double AMPLITUDE = 0.3;
 void printKeyboard()
 {
     std::string keyboard_layout = R"(
-        |   |   |   |   |   | |   |   |   |   | |   | |   |   |   |
-        |   | S |   |   | F | | G |   |   | J | | K | | L |   |   |
-        |   |___|   |   |___| |___|   |   |___| |___| |___|   |   |__
-        |     |     |     |     |     |     |     |     |     |     |
-        |  Z  |  X  |  C  |  V  |  B  |  N  |  M  |  ,  |  .  |  /  |
-        |_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|)";
+    |   |   | |   |   |   |   | |   | |   |   |   |   |   |
+    |   | W | | E |   |   | T | | Y | | U |   |   | O |   |
+    |   |___| |___|   |   |___| |___| |___|   |   |___|   |
+    |     |     |     |     |     |     |     |     |     |
+    |  A  |  S  |  D  |  F  |  G  |  H  |  J  |  K  |  L  |
+    |_____|_____|_____|_____|_____|_____|_____|_____|_____|
+    
+    Use Z and X to adjust the octave.
+    )";
+        
+    std::cout << "Sound playing..." << std::endl;
 
     std::cout << keyboard_layout << std::endl;
 }
