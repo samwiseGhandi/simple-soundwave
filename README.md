@@ -1,4 +1,4 @@
-# simple-soundwave 
+# simple-soundwave WIP
 I have been working on this file for my final school project where me and a friend will create a software synth.
 
 ## To run and compile run the following:
